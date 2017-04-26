@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16.17 20.1">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #666f71;
+      }
+    </style>
+  </defs>
+  <title>elsen-hex-gray-thin-hollow</title>
+  <g id="Layer_2" data-name="Layer 2">
+    <g id="Layer_1-2" data-name="Layer 1">
+      <path class="cls-1" d="M8.08,0,0,5V15.08l8.08,5,8.09-5V5Zm3.84,12.44L8.08,14.83,4.24,12.44V7.66L8.08,5.28l3.84,2.39Z"/>
+    </g>
+  </g>
+</svg>

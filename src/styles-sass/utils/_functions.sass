@@ -1,0 +1,556 @@
+=clearfix
+  &::after
+    clear: both
+    content: ""
+    display: block
+
+@function is-not($value)
+  @return if($value, false, true)
+
+// Checks if a number is even
+@function is-even($int)
+  @return $int % 2 == 0
+
+// Checks if an element belongs to a list or not
+@function belongs-to($tested-item, $list)
+  @return is-not(not-belongs-to($tested-item, $list))
+
+@function not-belongs-to($tested-item, $list)
+  @return is-not(index($list, $tested-item))
+
+// Contains display value
+@function contains-display-value($query)
+  @return belongs-to(table, $query) or belongs-to(block, $query) or belongs-to(inline-block, $query) or belongs-to(inline, $query)
+
+// Parses the first argument of span-columns()
+@function container-span($span: $span)
+  @if length($span) == 3
+    $container-columns: nth($span, 3)
+
+    @return $container-columns
+  @else if length($span) == 2
+    $container-columns: nth($span, 2)
+
+    @return $container-columns
+
+  @return $grid-columns
+
+@function container-shift($shift: $shift)
+  $parent-columns: $grid-columns !global !default
+
+  @if length($shift) == 3
+    $container-columns: nth($shift, 3)
+
+    @return $container-columns
+  @else if length($shift) == 2
+    $container-columns: nth($shift, 2)
+
+    @return $container-columns
+
+  @return $parent-columns
+
+// Generates a striped background
+@function gradient-stops($grid-columns, $color: $visual-grid-color)
+  $transparent: transparent
+  $alt-color: darken($color, 10%)
+
+  $column-width: flex-grid(1, $grid-columns)
+  $gutter-width: flex-gutter($grid-columns)
+  $column-offset: $column-width
+  $alternate: false
+
+  $values: $transparent 0, if($alternate, $color, $alt-color) 0
+
+  @for $i from 1 to $grid-columns * 2
+    @if is-even($i)
+      $values: append($values, $transparent $column-offset, comma)
+      $values: append($values, if($alternate, $color, $alt-color) $column-offset, comma)
+      $column-offset: $column-offset + $column-width
+    @else
+      $values: append($values, if($alternate, $color, $alt-color) $column-offset, comma)
+      $values: append($values, $transparent $column-offset, comma)
+      $column-offset: $column-offset + $gutter-width
+
+      $alternate: not $alternate
+
+  @return $values
+
+// Layout direction
+@function get-direction($layout, $default)
+  $direction: null
+
+  @if to-upper-case($layout) == "LTR" or to-upper-case($layout) == "RTL"
+    $direction: direction-from-layout($layout)
+  @else
+    $direction: direction-from-layout($default)
+
+  @return $direction
+
+@function direction-from-layout($layout)
+  $direction: null
+
+  @if to-upper-case($layout) == "LTR"
+    $direction: right
+  @else
+    $direction: left
+
+  @return $direction
+
+@function get-opposite-direction($direction)
+  $opposite-direction: left
+
+  @if $direction == "left"
+    $opposite-direction: right
+
+  @return $opposite-direction
+
+@function to-number($string)
+  $string: str-replace($string, " ", "")
+  $strings: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9"
+  $numbers: 0 1 2 3 4 5 6 7 8 9
+  $result: 0
+
+  @for $i from 1 through str-length($string)
+    $character: str-slice($string, $i, $i)
+    $index: index($strings, $character)
+
+    @if not $index
+      @warn "Unknown character `#{$character}`."
+
+      @return false
+
+    $number: nth($numbers, $index)
+    $result: $result * 10 + $number
+
+  @return $result
+
+@function str-replace($string, $search, $replace: "")
+  $index: str-index($string, $search)
+
+  @if $index
+    $first: str-slice($string, 1, $index - 1)
+    $last-slice: str-slice($string, $index + str-length($search))
+    $last: str-replace($last-slice, $search, $replace)
+
+    @return $first + $replace + $last
+
+  @return $string
+
+@function new-breakpoint($query: $feature $value $columns, $total-columns: $grid-columns)
+  @if length($query) == 1
+    $query: $default-feature nth($query, 1) $total-columns
+  @else if is-even(length($query))
+    $query: append($query, $total-columns)
+
+  @if is-not(belongs-to($query, $visual-grid-breakpoints))
+    $visual-grid-breakpoints: append($visual-grid-breakpoints, $query, comma) !global
+
+  @return $query
+
+$column: 4.2358em !default
+
+$gutter: 1.618em !default
+
+$grid-columns: 12 !default
+
+$max-width: 1200px !default
+
+$border-box-sizing: true !default
+
+$default-feature: min-width
+
+$default-layout-direction: LTR !default
+
+$visual-grid: false !default
+
+$visual-grid-color: #eee !default
+
+$visual-grid-index: back !default
+
+$visual-grid-opacity: 0.4 !default
+
+$visual-grid-breakpoints: () !default
+
+$disable-warnings: false !default
+
+=-neat-warn($message)
+  @if $disable-warnings == false
+    @warn "#{$message}"
+
+$parent-columns: $grid-columns !default
+$fg-column: $column
+$fg-gutter: $gutter
+$fg-max-columns: $grid-columns
+$container-display-table: false !default
+$layout-direction: LTR !default
+
+@function flex-grid($columns, $container-columns: $fg-max-columns)
+  $width: flex-width($columns)
+  $container-width: flex-width($container-columns)
+
+  @return percentage($width / $container-width)
+
+@function flex-gutter($container-columns: $fg-max-columns, $gutter: $fg-gutter)
+  $container-width: flex-width($container-columns)
+
+  @return percentage($gutter / $container-width)
+
+@function flex-width($n, $column-width: $fg-column, $gutter-width: $fg-gutter)
+  @return $n * $column-width + ($n - 1) * $gutter-width
+
+@function get-parent-columns($columns)
+  @if $columns != $grid-columns
+    $parent-columns: $columns !global
+  @else
+    $parent-columns: $grid-columns !global
+
+  @return $parent-columns
+
+@function is-display-table($container-is-display-table, $display)
+  @return $container-is-display-table == true or $display == table
+
+@if $border-box-sizing == true
+  html
+    // http://bit.ly/1qk2tVR
+    box-sizing: border-box
+
+  *
+    &,
+    &::after,
+    &::before
+      box-sizing: inherit
+
+=omega($query: block, $direction: default)
+  $table: belongs-to(table, $query)
+  $auto: belongs-to(auto, $query)
+
+  @if $direction != default
+    +-neat-warn("The omega mixin will no longer take a $direction argument. To change the layout direction, use the direction(){...} mixin.")
+  @else
+    $direction: get-direction($layout-direction, $default-layout-direction)
+
+  @if $table
+    +-neat-warn("The omega mixin no longer removes padding in table layouts.")
+
+  @if length($query) == 1
+    @if $auto
+      &:last-child
+        margin-#{$direction}: 0
+    @else if contains-display-value($query) and $table == false
+      margin-#{$direction}: 0
+    @else
+      +nth-child($query, $direction)
+  @else if length($query) == 2
+    @if $auto
+      &:last-child
+        margin-#{$direction}: 0
+    @else
+      +nth-child(nth($query, 1), $direction)
+  @else
+    +-neat-warn("Too many arguments passed to the omega() mixin.")
+
+=nth-child($query, $direction)
+  $opposite-direction: get-opposite-direction($direction)
+
+  &:nth-child(#{$query})
+    margin-#{$direction}: 0
+
+  @if type-of($query) == string
+    $query: str-replace($query, " ", "")
+    $operator: false
+
+    @if str_index($query, "+")
+      $operator: "+"
+    @else if str_index($query, "-")
+      $operator: "-"
+
+    @if $operator
+      $operator-index: str_index($query, $operator)
+      $first: str-slice($query, 0, $operator-index - 1)
+      $last: to-number(str-slice($query, $operator-index + 1, -1))
+
+      @if $operator == "+"
+        $last: $last + 1
+      @else if $operator == "-"
+        $last: $last - 1
+
+      $nth: "#{$first}#{$operator}#{$last}"
+
+      &:nth-child(#{$nth})
+        clear: $opposite-direction
+  @else if (type-of($query) == number) & & (unit($query) == "n")
+    &:nth-child(#{$query}+1)
+      clear: $opposite-direction
+
+=outer-container($local-max-width: $max-width)
+  +clearfix
+
+  max-width: $local-max-width
+  margin:
+    left: auto
+    right: auto
+
+=span-columns($span: $columns of $container-columns, $display: block)
+  $columns: nth($span, 1)
+  $container-columns: container-span($span)
+
+  $parent-columns: get-parent-columns($container-columns) !global
+
+  $direction: get-direction($layout-direction, $default-layout-direction)
+  $opposite-direction: get-opposite-direction($direction)
+
+  $display-table: is-display-table($container-display-table, $display)
+
+  @if $display-table
+    display: table-cell
+    width: percentage($columns / $container-columns)
+  @else
+    float: #{$opposite-direction}
+
+    @if $display != no-display
+      display: block
+
+    @if $display == collapse
+      +-neat-warn("The 'collapse' argument will be deprecated. Use 'block-collapse' instead.")
+
+    @if $display == collapse or $display == block-collapse
+      width: flex-grid($columns, $container-columns) + flex-gutter($container-columns)
+
+      &:last-child
+        width: flex-grid($columns, $container-columns)
+    @else
+      margin-#{$direction}: flex-gutter($container-columns)
+      width: flex-grid($columns, $container-columns)
+
+      &:last-child
+        margin-#{$direction}: 0
+
+=row($display: default, $direction: $default-layout-direction)
+  $layout-direction: $direction !global
+
+  @if $display == table
+    display: table
+
+    +fill-parent
+
+    table-layout: fixed
+
+    $container-display-table: true !global
+  @else
+    +clearfix
+
+    display: block
+
+    $container-display-table: false !global
+
+=shift($n-columns: 1)
+  +shift-in-context($n-columns)
+
+=shift-in-context($shift: $columns of $container-columns)
+  $n-columns: nth($shift, 1)
+  $parent-columns: container-shift($shift) !global
+
+  $direction: get-direction($layout-direction, $default-layout-direction)
+  $opposite-direction: get-opposite-direction($direction)
+
+  margin-#{$opposite-direction}: $n-columns * flex-grid(1, $parent-columns) + $n-columns * flex-gutter($parent-columns)
+
+  $parent-columns: $grid-columns !global
+
+=pad($padding: flex-gutter())
+  $padding-list: null
+
+  @each $value in $padding
+    $value: if($value == "default", flex-gutter(), $value)
+    $padding-list: join($padding-list, $value)
+
+  padding: $padding-list
+
+=fill-parent
+  width: 100%
+
+  @if $border-box-sizing == false
+    box-sizing: border-box
+
+=media($query: $feature $value $columns, $total-columns: $grid-columns)
+  @if length($query) == 1
+    @media screen and ($default-feature: nth($query, 1))
+      $default-grid-columns: $grid-columns
+      $grid-columns: $total-columns !global
+
+      @content
+
+      $grid-columns: $default-grid-columns !global
+  @else
+    $loop-to: length($query)
+    $media-query: "screen and "
+    $default-grid-columns: $grid-columns
+    $grid-columns: $total-columns !global
+
+    @if is-not(is-even(length($query)))
+      $grid-columns: nth($query, $loop-to) !global
+      $loop-to: $loop-to - 1
+
+    $i: 1
+
+    @while $i <= $loop-to
+      $media-query: $media-query + "(" + nth($query, $i) + ": " + nth($query, $i + 1) + ") "
+
+      @if $i + 1 != $loop-to
+        $media-query: $media-query + "and "
+
+      $i: $i + 2
+
+    @media #{$media-query}
+      @content
+
+      $grid-columns: $default-grid-columns !global
+
+=reset-display
+  $container-display-table: false !global
+
+=grid-column-gradient($values...)
+  background-image: -webkit-linear-gradient(left, $values)
+  background-image: -moz-linear-gradient(left, $values)
+  background-image: -ms-linear-gradient(left, $values)
+  background-image: -o-linear-gradient(left, $values)
+  background-image: unquote("linear-gradient(to left, #{$values})")
+
+@if $visual-grid == true or $visual-grid == yes
+  body:before
+    +grid-column-gradient(gradient-stops($grid-columns))
+
+    content: ""
+    display: inline-block
+    height: 100%
+    left: 0
+    margin: 0 auto
+    max-width: $max-width
+    opacity: $visual-grid-opacity
+    pointer-events: none
+    position: fixed
+    right: 0
+    width: 100%
+
+    @if $visual-grid-index == back
+      z-index: -1
+    @else if $visual-grid-index == front
+      z-index: 9999
+
+    @each $breakpoint in $visual-grid-breakpoints
+      @if $breakpoint
+        +media($breakpoint)
+          +grid-column-gradient(gradient-stops($grid-columns))
+
+=display-context($display: block)
+  $scope-display: $container-display-table
+  $container-display-table: $display == table !global
+
+  @content
+
+  $container-display-table: $scope-display !global
+
+=direction-context($direction: left-to-right)
+  $scope-direction: $layout-direction
+
+  @if to-lower-case($direction) == "left-to-right"
+    $layout-direction: LTR !global
+  @else if to-lower-case($direction) == "right-to-left"
+    $layout-direction: RTL !global
+
+  @content
+
+  $layout-direction: $scope-direction !global
+
+=direction-context($direction: left-to-right)
+  $scope-direction: $layout-direction
+
+  @if to-lower-case($direction) == "left-to-right"
+    $layout-direction: LTR !global
+  @else if to-lower-case($direction) == "right-to-left"
+    $layout-direction: RTL !global
+
+  @content
+
+  $layout-direction: $scope-direction !global
+
+$em-base: 16
+
+@function em($pixels, $context: $em-base)
+  @return #{$pixels / $context}em
+
+=border-slide($mainColor: $dark, $borderColor: $color-alpha, $height: 3px)
+  position: relative
+  color: $mainColor
+
+  &:after
+    content: ''
+    position: absolute
+    bottom: 0
+    left: 0
+    width: 0%
+    border-bottom: $height solid $borderColor
+    transition: width 0.4s ease-in-out
+
+  &:hover:after
+    width: 100%
+
+/**
+ * Button Slide
+ * Need to still add hover state in parent element
+ * box-shadow: inset 175px 0 0 0 $color-alpha;
+ * color: $light;
+=button-slide($pad: 0.5em, $border: 3px)
+  @extend %letter-spacing
+
+  display: inline-block
+  padding: $pad
+  border: $border solid $green
+  box-shadow: inset 0 0 0 0 $green
+  transition: all 0.4s ease-in-out
+
+/**
+ * Flex Grid
+=flex-grid($sm: null, $md: null, $lg: null, $xl: null, $xxl: null, $pad: 0)
+  display: flex
+  flex-direction: row
+  flex-flow: wrap
+
+  & > *
+    padding: $pad
+    flex-basis: 100% / $sm
+    max-width: 100% / $sm
+
+    @media (min-width: $mq-md)
+      flex-basis: 100% / $md
+      max-width: 100% / $md
+
+    @if $lg
+      @media (min-width: $mq-lg)
+        flex-basis: 100% / $lg
+        max-width: 100% / $lg
+
+    @if $xl
+      @media (min-width: $mq-xl)
+        flex-basis: 100% / $xl
+        max-width: 100% / $xl
+
+    @if $xxl
+      @media (min-width: $mq-xxl)
+        flex-basis: 100% / $xxl
+        max-width: 100% / $xxl
+
+/**
+ * Box Shadow
+=box-shadow($size, $color: $dark)
+  box-shadow: 0 $size ($size * 2) rgba($color, 0.1), 0 $size ($size * 2) rgba($color, 0.2)
+
+%overlay
+  content: ''
+  position: absolute
+  top: 0
+  left: 0
+  height: 100%
+  width: 100%
+  background-color: rgba($dark, 0.2)
+  transition: background-color 0.4s ease-in-out

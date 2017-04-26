@@ -350,6 +350,38 @@ a {
   .text-wrap {
     width: 400px; } }
 
+svg:not(:root) {
+  overflow: visible; }
+
+#motionPath {
+  display: none; }
+
+.hexagon {
+  float: right;
+  position: relative;
+  overflow: visible;
+  z-index: 100; }
+
+#hex-1 {
+  right: 15em;
+  top: 10em; }
+
+#hex-2 {
+  right: 27em;
+  top: 13em; }
+
+#hex-3 {
+  right: 6em;
+  top: 20em; }
+
+#hex-4 {
+  right: 8em;
+  top: 12em; }
+
+#hex-5 {
+  right: 30em;
+  top: 12em; }
+
 #home-head {
   padding: 10em 0;
   height: 100%; }

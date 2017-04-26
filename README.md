@@ -66,9 +66,11 @@ Alright let's do it. If you need more detail on any of these steps, just ask.
 2. Open up your terminal and clone your repo so you have it locally. `git clone https://github.com/[your-username]/headers.git`
 3. Go into the folder, `cd headers`.
 4. I've included a `.gitignore` file, but chances are your environment won't be the same as mine.
-  a. Go ahead and open up the `.gitignore` and erase it.
-  b. You can develop a new file with this [awesome generator](https://www.gitignore.io/
-    - Add your operating system, text editor, and sass.
+
+    a. Go ahead and open up the `.gitignore` and erase it.
+
+    b. You can develop a new file with this [awesome generator](https://www.gitignore.io/
+      - Add your operating system, text editor, and sass.
 
 **If you decide not to use git, you can manually download these files and set them up your own way**
 

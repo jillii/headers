@@ -1,3 +1,7 @@
+// abandon all hope, ye who enter here
+// i've never used grunt so you may have to
+// fix this up to use to your liking
+
 module.exports = function (grunt) {
 
   // Project configuration.

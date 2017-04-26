@@ -26,19 +26,19 @@
 
 // Contains display value
 @function contains-display-value($query) {
-  @return belongs-to(table, $query)
-       or belongs-to(block, $query)
-       or belongs-to(inline-block, $query)
-       or belongs-to(inline, $query);
+  @return belongs-to(table, $query) or belongs-to(block, $query) or belongs-to(inline-block, $query) or belongs-to(inline, $query);
 }
 
 // Parses the first argument of span-columns()
 @function container-span($span: $span) {
   @if length($span) == 3 {
     $container-columns: nth($span, 3);
+
     @return $container-columns;
-  } @else if length($span) == 2 {
+  }
+  @else if length($span) == 2 {
     $container-columns: nth($span, 2);
+
     @return $container-columns;
   }
 
@@ -46,13 +46,16 @@
 }
 
 @function container-shift($shift: $shift) {
-  $parent-columns: $grid-columns !default !global;
+  $parent-columns: $grid-columns !global !default;
 
   @if length($shift) == 3 {
     $container-columns: nth($shift, 3);
+
     @return $container-columns;
-  } @else if length($shift) == 2 {
+  }
+  @else if length($shift) == 2 {
     $container-columns: nth($shift, 2);
+
     @return $container-columns;
   }
 
@@ -69,14 +72,15 @@
   $column-offset: $column-width;
   $alternate: false;
 
-  $values: ($transparent 0, if($alternate, $color, $alt-color) 0);
+  $values: $transparent 0, if($alternate, $color, $alt-color) 0;
 
-  @for $i from 1 to $grid-columns*2 {
+  @for $i from 1 to $grid-columns * 2 {
     @if is-even($i) {
       $values: append($values, $transparent $column-offset, comma);
       $values: append($values, if($alternate, $color, $alt-color) $column-offset, comma);
       $column-offset: $column-offset + $column-width;
-    } @else {
+    }
+    @else {
       $values: append($values, if($alternate, $color, $alt-color) $column-offset, comma);
       $values: append($values, $transparent $column-offset, comma);
       $column-offset: $column-offset + $gutter-width;
@@ -94,7 +98,8 @@
 
   @if to-upper-case($layout) == "LTR" or to-upper-case($layout) == "RTL" {
     $direction: direction-from-layout($layout);
-  } @else {
+  }
+  @else {
     $direction: direction-from-layout($default);
   }
 
@@ -106,7 +111,8 @@
 
   @if to-upper-case($layout) == "LTR" {
     $direction: right;
-  } @else {
+  }
+  @else {
     $direction: left;
   }
 
@@ -123,11 +129,10 @@
   @return $opposite-direction;
 }
 
-
 @function to-number($string) {
   $string: str-replace($string, " ", "");
   $strings: "0" "1" "2" "3" "4" "5" "6" "7" "8" "9";
-  $numbers:  0 1 2 3 4 5 6 7 8 9;
+  $numbers: 0 1 2 3 4 5 6 7 8 9;
   $result: 0;
 
   @for $i from 1 through str-length($string) {
@@ -136,6 +141,7 @@
 
     @if not $index {
       @warn "Unknown character `#{$character}`.";
+
       @return false;
     }
 
@@ -153,6 +159,7 @@
     $first: str-slice($string, 1, $index - 1);
     $last-slice: str-slice($string, $index + str-length($search));
     $last: str-replace($last-slice, $search, $replace);
+
     @return $first + $replace + $last;
   }
 
@@ -162,7 +169,8 @@
 @function new-breakpoint($query: $feature $value $columns, $total-columns: $grid-columns) {
   @if length($query) == 1 {
     $query: $default-feature nth($query, 1) $total-columns;
-  } @else if is-even(length($query)) {
+  }
+  @else if is-even(length($query)) {
     $query: append($query, $total-columns);
   }
 
@@ -215,11 +223,13 @@ $layout-direction: LTR !default;
 @function flex-grid($columns, $container-columns: $fg-max-columns) {
   $width: flex-width($columns);
   $container-width: flex-width($container-columns);
+
   @return percentage($width / $container-width);
 }
 
 @function flex-gutter($container-columns: $fg-max-columns, $gutter: $fg-gutter) {
   $container-width: flex-width($container-columns);
+
   @return percentage($gutter / $container-width);
 }
 
@@ -230,7 +240,8 @@ $layout-direction: LTR !default;
 @function get-parent-columns($columns) {
   @if $columns != $grid-columns {
     $parent-columns: $columns !global;
-  } @else {
+  }
+  @else {
     $parent-columns: $grid-columns !global;
   }
 
@@ -242,7 +253,8 @@ $layout-direction: LTR !default;
 }
 
 @if $border-box-sizing == true {
-  html { // http://bit.ly/1qk2tVR
+  html {
+    // http://bit.ly/1qk2tVR
     box-sizing: border-box;
   }
 
@@ -261,7 +273,8 @@ $layout-direction: LTR !default;
 
   @if $direction != default {
     @include -neat-warn("The omega mixin will no longer take a $direction argument. To change the layout direction, use the direction(){...} mixin.");
-  } @else {
+  }
+  @else {
     $direction: get-direction($layout-direction, $default-layout-direction);
   }
 
@@ -275,23 +288,24 @@ $layout-direction: LTR !default;
         margin-#{$direction}: 0;
       }
     }
-
     @else if contains-display-value($query) and $table == false {
       margin-#{$direction}: 0;
     }
-
     @else {
       @include nth-child($query, $direction);
     }
-  } @else if length($query) == 2 {
+  }
+  @else if length($query) == 2 {
     @if $auto {
       &:last-child {
         margin-#{$direction}: 0;
       }
-    } @else {
+    }
+    @else {
       @include nth-child(nth($query, 1), $direction);
     }
-  } @else {
+  }
+  @else {
     @include -neat-warn("Too many arguments passed to the omega() mixin.");
   }
 }
@@ -309,26 +323,31 @@ $layout-direction: LTR !default;
 
     @if str_index($query, "+") {
       $operator: "+";
-    } @else if str_index($query, "-") {
+    }
+    @else if str_index($query, "-") {
       $operator: "-";
     }
 
     @if $operator {
       $operator-index: str_index($query, $operator);
-      $first: str-slice($query, 0, ($operator-index - 1));
-      $last: to-number(str-slice($query, ($operator-index + 1), -1));
+      $first: str-slice($query, 0, $operator-index - 1);
+      $last: to-number(str-slice($query, $operator-index + 1, -1));
+
       @if $operator == "+" {
         $last: $last + 1;
-      } @else if $operator == "-" {
+      }
+      @else if $operator == "-" {
         $last: $last - 1;
       }
+
       $nth: "#{$first}#{$operator}#{$last}";
 
       &:nth-child(#{$nth}) {
         clear: $opposite-direction;
       }
     }
-  } @else if type-of($query) == number && unit($query) == "n" {
+  }
+  @else if (type-of($query) == number) & & (unit($query) == "n") {
     &:nth-child(#{$query}+1) {
       clear: $opposite-direction;
     }
@@ -337,11 +356,12 @@ $layout-direction: LTR !default;
 
 @mixin outer-container($local-max-width: $max-width) {
   @include clearfix;
+
   max-width: $local-max-width;
   margin: {
     left: auto;
     right: auto;
-  }
+  };
 }
 
 @mixin span-columns($span: $columns of $container-columns, $display: block) {
@@ -355,10 +375,11 @@ $layout-direction: LTR !default;
 
   $display-table: is-display-table($container-display-table, $display);
 
-  @if $display-table  {
+  @if $display-table {
     display: table-cell;
     width: percentage($columns / $container-columns);
-  } @else {
+  }
+  @else {
     float: #{$opposite-direction};
 
     @if $display != no-display {
@@ -375,8 +396,8 @@ $layout-direction: LTR !default;
       &:last-child {
         width: flex-grid($columns, $container-columns);
       }
-
-    } @else {
+    }
+    @else {
       margin-#{$direction}: flex-gutter($container-columns);
       width: flex-grid($columns, $container-columns);
 
@@ -388,17 +409,22 @@ $layout-direction: LTR !default;
 }
 
 @mixin row($display: default, $direction: $default-layout-direction) {
-
   $layout-direction: $direction !global;
 
   @if $display == table {
     display: table;
+
     @include fill-parent;
+
     table-layout: fixed;
+
     $container-display-table: true !global;
-  } @else {
+  }
+  @else {
     @include clearfix;
+
     display: block;
+
     $container-display-table: false !global;
   }
 }
@@ -421,14 +447,16 @@ $layout-direction: LTR !default;
 
 @mixin pad($padding: flex-gutter()) {
   $padding-list: null;
+
   @each $value in $padding {
-    $value: if($value == 'default', flex-gutter(), $value);
+    $value: if($value == "default", flex-gutter(), $value);
     $padding-list: join($padding-list, $value);
   }
+
   padding: $padding-list;
 }
 
-@mixin fill-parent() {
+@mixin fill-parent {
   width: 100%;
 
   @if $border-box-sizing == false {
@@ -441,10 +469,13 @@ $layout-direction: LTR !default;
     @media screen and ($default-feature: nth($query, 1)) {
       $default-grid-columns: $grid-columns;
       $grid-columns: $total-columns !global;
+
       @content;
+
       $grid-columns: $default-grid-columns !global;
     }
-  } @else {
+  }
+  @else {
     $loop-to: length($query);
     $media-query: "screen and ";
     $default-grid-columns: $grid-columns;
@@ -456,10 +487,11 @@ $layout-direction: LTR !default;
     }
 
     $i: 1;
+
     @while $i <= $loop-to {
       $media-query: $media-query + "(" + nth($query, $i) + ": " + nth($query, $i + 1) + ") ";
 
-      @if ($i + 1) != $loop-to {
+      @if $i + 1 != $loop-to {
         $media-query: $media-query + "and ";
       }
 
@@ -468,6 +500,7 @@ $layout-direction: LTR !default;
 
     @media #{$media-query} {
       @content;
+
       $grid-columns: $default-grid-columns !global;
     }
   }
@@ -488,6 +521,7 @@ $layout-direction: LTR !default;
 @if $visual-grid == true or $visual-grid == yes {
   body:before {
     @include grid-column-gradient(gradient-stops($grid-columns));
+
     content: "";
     display: inline-block;
     height: 100%;
@@ -503,7 +537,6 @@ $layout-direction: LTR !default;
     @if $visual-grid-index == back {
       z-index: -1;
     }
-
     @else if $visual-grid-index == front {
       z-index: 9999;
     }
@@ -532,7 +565,8 @@ $layout-direction: LTR !default;
 
   @if to-lower-case($direction) == "left-to-right" {
     $layout-direction: LTR !global;
-  } @else if to-lower-case($direction) == "right-to-left" {
+  }
+  @else if to-lower-case($direction) == "right-to-left" {
     $layout-direction: RTL !global;
   }
 
@@ -546,7 +580,8 @@ $layout-direction: LTR !default;
 
   @if to-lower-case($direction) == "left-to-right" {
     $layout-direction: LTR !global;
-  } @else if to-lower-case($direction) == "right-to-left" {
+  }
+  @else if to-lower-case($direction) == "right-to-left" {
     $layout-direction: RTL !global;
   }
 
@@ -558,20 +593,18 @@ $layout-direction: LTR !default;
 $em-base: 16;
 
 @function em($pixels, $context: $em-base) {
-  @return #{$pixels/$context}em;
+  @return #{$pixels / $context}em;
 }
 
 @mixin border-slide($mainColor: $dark, $borderColor: $color-alpha, $height: 3px) {
   position: relative;
-
   color: $mainColor;
 
   &:after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     left: 0;
-
     width: 0%;
     border-bottom: $height solid $borderColor;
     transition: width 0.4s ease-in-out;
@@ -586,22 +619,19 @@ $em-base: 16;
  * Button Slide
  * Need to still add hover state in parent element
  * box-shadow: inset 175px 0 0 0 $color-alpha;
- * color: $light;
- */
+ * color: $light; */
 @mixin button-slide($pad: 0.5em, $border: 3px) {
   @extend %letter-spacing;
 
   display: inline-block;
   padding: $pad;
-
   border: $border solid $green;
   box-shadow: inset 0 0 0 0 $green;
   transition: all 0.4s ease-in-out;
 }
 
 /**
- * Flex Grid
- */
+ * Flex Grid */
 @mixin flex-grid($sm: null, $md: null, $lg: null, $xl: null, $xxl: null, $pad: 0) {
   display: flex;
   flex-direction: row;
@@ -619,8 +649,8 @@ $em-base: 16;
 
     @if $lg {
       @media (min-width: $mq-lg) {
-        flex-basis: 100%/$lg;
-        max-width: 100%/$lg;
+        flex-basis: 100% / $lg;
+        max-width: 100% / $lg;
       }
     }
 
@@ -641,21 +671,18 @@ $em-base: 16;
 }
 
 /**
- * Box Shadow
- */
+ * Box Shadow */
 @mixin box-shadow($size, $color: $dark) {
-  box-shadow: 0 $size $size * 2 rgba($color, 0.1), 0 $size $size * 2 rgba($color, 0.2);
+  box-shadow: 0 $size ($size * 2) rgba($color, 0.1), 0 $size ($size * 2) rgba($color, 0.2);
 }
 
 %overlay {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
-
   height: 100%;
   width: 100%;
-
   background-color: rgba($dark, 0.2);
   transition: background-color 0.4s ease-in-out;
 }
